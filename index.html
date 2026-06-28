@@ -1,1006 +1,306 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>TRAXEX Miner</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>TON WORLD</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap');
-
-  :root {
-    --bg: #0a0a0f;
-    --bg2: #111118;
-    --bg3: #1a1a28;
-    --accent: #7c3aed;
-    --accent2: #a855f7;
-    --gold: #f59e0b;
-    --gold2: #fbbf24;
-    --cyan: #06b6d4;
-    --red: #ef4444;
-    --green: #10b981;
-    --text: #e2e8f0;
-    --text2: #94a3b8;
-    --border: #2d2d44;
-  }
-
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Rajdhani', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Stars background */
-  body::before {
-    content:'';
-    position:fixed;
-    inset:0;
-    background: 
-      radial-gradient(1px 1px at 20% 30%, rgba(124,58,237,0.4) 0%, transparent 100%),
-      radial-gradient(1px 1px at 80% 10%, rgba(168,85,247,0.3) 0%, transparent 100%),
-      radial-gradient(1px 1px at 50% 80%, rgba(6,182,212,0.2) 0%, transparent 100%);
-    pointer-events:none;
-    z-index:0;
-  }
-
-  /* NAV */
-  .nav {
-    display:flex;
-    justify-content:space-around;
-    background: rgba(17,17,24,0.95);
-    backdrop-filter: blur(20px);
-    border-top: 1px solid var(--border);
-    position:fixed;
-    bottom:0; left:0; right:0;
-    padding: 8px 0 12px;
-    z-index:100;
-  }
-  .nav-btn {
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:3px;
-    background:none;
-    border:none;
-    color:var(--text2);
-    font-family:'Rajdhani',sans-serif;
-    font-size:11px;
-    font-weight:600;
-    cursor:pointer;
-    padding:6px 12px;
-    border-radius:12px;
-    transition: all 0.2s;
-  }
-  .nav-btn .icon { font-size:22px; }
-  .nav-btn.active { color:var(--accent2); }
-  .nav-btn.active .icon { filter: drop-shadow(0 0 6px var(--accent2)); }
-
-  /* PAGES */
-  .page { display:none; padding:16px 16px 80px; position:relative; z-index:1; }
-  .page.active { display:block; }
-
-  /* HEADER */
-  .logo {
-    text-align:center;
-    padding: 20px 0 8px;
-  }
-  .logo h1 {
-    font-family:'Orbitron',sans-serif;
-    font-size:28px;
-    font-weight:900;
-    background: linear-gradient(135deg, var(--accent2), var(--cyan));
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-    letter-spacing:4px;
-  }
-  .logo p { color:var(--text2); font-size:13px; margin-top:4px; }
-
-  /* BALANCE CARD */
-  .balance-card {
-    background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(6,182,212,0.1));
-    border: 1px solid rgba(124,58,237,0.4);
-    border-radius:20px;
-    padding:24px;
-    text-align:center;
-    margin-bottom:16px;
-    position:relative;
-    overflow:hidden;
-  }
-  .balance-card::before {
-    content:'';
-    position:absolute;
-    top:-50%;left:-50%;
-    width:200%;height:200%;
-    background: radial-gradient(circle at center, rgba(124,58,237,0.05) 0%, transparent 70%);
-    pointer-events:none;
-  }
-  .balance-label { color:var(--text2); font-size:13px; letter-spacing:2px; text-transform:uppercase; }
-  .balance-amount {
-    font-family:'Orbitron',sans-serif;
-    font-size:36px;
-    font-weight:900;
-    color:var(--gold2);
-    text-shadow: 0 0 20px rgba(245,158,11,0.4);
-    margin:8px 0;
-  }
-  .balance-ton { color:var(--cyan); font-size:14px; }
-
-  /* MINE BUTTON */
-  .mine-container { text-align:center; margin:20px 0; }
-  .mine-btn {
-    width:160px;height:160px;
-    border-radius:50%;
-    border:3px solid var(--accent);
-    background: radial-gradient(circle at 40% 35%, rgba(124,58,237,0.4), rgba(10,10,15,0.9));
-    box-shadow: 0 0 30px rgba(124,58,237,0.3), inset 0 0 30px rgba(124,58,237,0.1);
-    cursor:pointer;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:6px;
-    transition:all 0.2s;
-    position:relative;
-    overflow:hidden;
-  }
-  .mine-btn:active { transform:scale(0.95); box-shadow:0 0 50px rgba(124,58,237,0.6); }
-  .mine-btn.disabled {
-    border-color:var(--border);
-    box-shadow:none;
-    opacity:0.6;
-    cursor:not-allowed;
-  }
-  .mine-btn .mine-icon { font-size:52px; }
-  .mine-btn .mine-label {
-    font-family:'Orbitron',sans-serif;
-    font-size:11px;
-    font-weight:700;
-    color:var(--accent2);
-    letter-spacing:2px;
-  }
-  .mine-btn .mine-amount { color:var(--gold2); font-size:16px; font-weight:700; }
-
-  /* TIMER */
-  .timer-box {
-    background: var(--bg2);
-    border:1px solid var(--border);
-    border-radius:14px;
-    padding:14px;
-    text-align:center;
-    margin-top:16px;
-  }
-  .timer-label { color:var(--text2); font-size:12px; letter-spacing:1px; }
-  .timer-value {
-    font-family:'Orbitron',sans-serif;
-    font-size:24px;
-    color:var(--accent2);
-    font-weight:700;
-    margin-top:4px;
-  }
-
-  /* STATS ROW */
-  .stats-row {
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-    margin-top:12px;
-  }
-  .stat-box {
-    background:var(--bg2);
-    border:1px solid var(--border);
-    border-radius:14px;
-    padding:14px;
-    text-align:center;
-  }
-  .stat-label { color:var(--text2); font-size:11px; letter-spacing:1px; }
-  .stat-value { font-family:'Orbitron',sans-serif; font-size:18px; color:var(--text); font-weight:700; margin-top:4px; }
-
-  /* SECTION TITLE */
-  .section-title {
-    font-family:'Orbitron',sans-serif;
-    font-size:13px;
-    font-weight:700;
-    color:var(--accent2);
-    letter-spacing:3px;
-    text-transform:uppercase;
-    margin:20px 0 12px;
-    padding-bottom:8px;
-    border-bottom:1px solid var(--border);
-  }
-
-  /* TEAM TREE */
-  .tree-wrapper { overflow-x:auto; padding:10px 0; }
-  .tree { display:flex; flex-direction:column; align-items:center; gap:0; }
-  .tree-level { display:flex; justify-content:center; gap:8px; margin:4px 0; position:relative; }
-  .tree-node {
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:3px;
-    cursor:pointer;
-  }
-  .node-avatar {
-    width:44px;height:44px;
-    border-radius:50%;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    display:flex;align-items:center;justify-content:center;
-    font-size:20px;
-    border:2px solid rgba(124,58,237,0.6);
-    box-shadow:0 0 10px rgba(124,58,237,0.3);
-    position:relative;
-  }
-  .node-avatar.empty {
-    background: var(--bg3);
-    border-color:var(--border);
-    box-shadow:none;
-    opacity:0.5;
-  }
-  .node-avatar.me {
-    width:54px;height:54px;
-    font-size:26px;
-    background: linear-gradient(135deg, var(--gold), var(--gold2));
-    border-color:var(--gold2);
-    box-shadow:0 0 20px rgba(245,158,11,0.4);
-  }
-  .node-id { font-size:9px; color:var(--text2); max-width:50px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .tree-line {
-    width:1px;height:20px;
-    background:linear-gradient(to bottom, var(--accent2), transparent);
-    margin:0 auto;
-  }
-  .tree-h-line {
-    height:1px;
-    background:linear-gradient(to right, transparent, var(--accent2), transparent);
-    margin:0 8px;
-  }
-
-  /* TEAM STATS */
-  .team-stats {
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:8px;
-    margin-top:16px;
-  }
-  .team-stat {
-    background:var(--bg2);
-    border:1px solid var(--border);
-    border-radius:12px;
-    padding:12px 8px;
-    text-align:center;
-  }
-  .team-stat-num { font-family:'Orbitron',sans-serif; font-size:20px; color:var(--accent2); font-weight:700; }
-  .team-stat-label { font-size:10px; color:var(--text2); margin-top:3px; letter-spacing:1px; }
-
-  /* SHOP */
-  .shop-tabs {
-    display:flex;
-    gap:8px;
-    margin-bottom:16px;
-    background:var(--bg2);
-    border-radius:12px;
-    padding:4px;
-  }
-  .shop-tab {
-    flex:1;
-    padding:8px;
-    border:none;
-    border-radius:10px;
-    background:transparent;
-    color:var(--text2);
-    font-family:'Rajdhani',sans-serif;
-    font-size:14px;
-    font-weight:700;
-    cursor:pointer;
-    transition:all 0.2s;
-  }
-  .shop-tab.active {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color:#fff;
-  }
-
-  .items-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .item-card {
-    background: var(--bg2);
-    border:1px solid var(--border);
-    border-radius:16px;
-    padding:14px 10px;
-    text-align:center;
-    cursor:pointer;
-    transition:all 0.2s;
-    position:relative;
-    overflow:hidden;
-  }
-  .item-card:active { transform:scale(0.97); }
-  .item-card.owned {
-    border-color:var(--green);
-    background: rgba(16,185,129,0.08);
-  }
-  .item-card.vip {
-    border-color:rgba(245,158,11,0.4);
-    background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(17,17,24,0.9));
-  }
-  .item-card.vip.owned { border-color:var(--green); }
-  .item-icon { font-size:36px; margin-bottom:6px; display:block; }
-  .item-name { font-size:13px; font-weight:700; color:var(--text); margin-bottom:4px; }
-  .item-effect { font-size:10px; color:var(--text2); margin-bottom:8px; line-height:1.4; }
-  .item-price {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius:8px;
-    padding:4px 8px;
-    font-size:12px;
-    font-weight:700;
-    color:#fff;
-    display:inline-block;
-  }
-  .item-price.owned-badge {
-    background: linear-gradient(135deg, var(--green), #059669);
-  }
-  .item-price.vip-price {
-    background: linear-gradient(135deg, var(--gold), var(--gold2));
-    color:#000;
-  }
-  .vip-crown {
-    position:absolute;
-    top:6px;right:6px;
-    font-size:14px;
-  }
-
-  /* WITHDRAW */
-  .withdraw-card {
-    background: var(--bg2);
-    border:1px solid var(--border);
-    border-radius:16px;
-    padding:20px;
-    margin-bottom:12px;
-  }
-  .withdraw-card h3 { color:var(--accent2); font-size:16px; margin-bottom:12px; }
-  .input-group { margin-bottom:14px; }
-  .input-group label { color:var(--text2); font-size:12px; letter-spacing:1px; display:block; margin-bottom:6px; }
-  .input-group input {
-    width:100%;
-    background:var(--bg3);
-    border:1px solid var(--border);
-    border-radius:10px;
-    padding:12px 14px;
-    color:var(--text);
-    font-family:'Rajdhani',sans-serif;
-    font-size:15px;
-    outline:none;
-    transition:border-color 0.2s;
-  }
-  .input-group input:focus { border-color:var(--accent2); }
-  .submit-btn {
-    width:100%;
-    padding:14px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border:none;
-    border-radius:12px;
-    color:#fff;
-    font-family:'Rajdhani',sans-serif;
-    font-size:16px;
-    font-weight:700;
-    cursor:pointer;
-    transition:opacity 0.2s;
-    letter-spacing:1px;
-  }
-  .submit-btn:active { opacity:0.8; }
-
-  .ref-box {
-    background:var(--bg2);
-    border:1px solid var(--border);
-    border-radius:14px;
-    padding:16px;
-    margin-bottom:12px;
-  }
-  .ref-link {
-    font-size:13px;
-    color:var(--cyan);
-    word-break:break-all;
-    margin:8px 0;
-    line-height:1.5;
-  }
-  .copy-btn {
-    background: rgba(6,182,212,0.15);
-    border:1px solid var(--cyan);
-    border-radius:8px;
-    color:var(--cyan);
-    padding:8px 16px;
-    font-family:'Rajdhani',sans-serif;
-    font-size:13px;
-    font-weight:700;
-    cursor:pointer;
-    width:100%;
-    margin-top:8px;
-  }
-
-  /* TOAST */
-  .toast {
-    position:fixed;
-    bottom:90px;left:50%;
-    transform:translateX(-50%) translateY(20px);
-    background:rgba(16,185,129,0.95);
-    color:#fff;
-    padding:10px 24px;
-    border-radius:30px;
-    font-size:14px;
-    font-weight:700;
-    opacity:0;
-    transition:all 0.3s;
-    z-index:999;
-    white-space:nowrap;
-  }
-  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-
-  /* MODAL */
-  .modal-overlay {
-    position:fixed;inset:0;
-    background:rgba(0,0,0,0.8);
-    z-index:200;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-  }
-  .modal-overlay.show { display:flex; }
-  .modal {
-    background:var(--bg2);
-    border:1px solid var(--accent);
-    border-radius:20px;
-    padding:24px;
-    width:100%;
-    max-width:340px;
-    text-align:center;
-  }
-  .modal h3 { font-family:'Orbitron',sans-serif; font-size:16px; color:var(--accent2); margin-bottom:12px; }
-  .modal .item-icon-big { font-size:60px; margin:10px 0; display:block; }
-  .modal p { color:var(--text2); font-size:14px; margin-bottom:6px; }
-  .modal .price-big { font-size:24px; color:var(--gold2); font-weight:700; margin:12px 0; }
-  .wallet-display {
-    background:var(--bg3);
-    border-radius:10px;
-    padding:10px;
-    font-size:11px;
-    color:var(--cyan);
-    word-break:break-all;
-    margin:10px 0;
-    direction:ltr;
-    text-align:left;
-  }
-  .modal-btns { display:flex; gap:8px; margin-top:16px; }
-  .modal-btns button {
-    flex:1;padding:12px;border:none;border-radius:12px;
-    font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;cursor:pointer;
-  }
-  .btn-cancel { background:var(--bg3); color:var(--text2); }
-  .btn-confirm { background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; }
-
-  .tx-input {
-    width:100%;margin-top:10px;
-    background:var(--bg3);
-    border:1px solid var(--border);
-    border-radius:10px;
-    padding:10px;
-    color:var(--text);
-    font-family:monospace;
-    font-size:12px;
-    outline:none;
-    direction:ltr;
-  }
-  .tx-input:focus { border-color:var(--accent2); }
-
-  .page-header {
-    text-align:center;
-    padding:16px 0 4px;
-  }
-  .page-header h2 {
-    font-family:'Orbitron',sans-serif;
-    font-size:18px;
-    font-weight:700;
-    color:var(--text);
-    letter-spacing:2px;
-  }
-  .page-header p { color:var(--text2); font-size:12px; margin-top:4px; }
-
-  .info-row {
-    display:flex;justify-content:space-between;align-items:center;
-    padding:10px 0;
-    border-bottom:1px solid var(--border);
-    font-size:14px;
-  }
-  .info-row:last-child { border-bottom:none; }
-  .info-row span:first-child { color:var(--text2); }
-  .info-row span:last-child { color:var(--text); font-weight:700; }
+:root{--bg:#050510;--bg2:#080820;--purple:#7b2fff;--neon:#b84fff;--cyan:#00f5ff;--pink:#ff2d78;--gold:#ffd700;--green:#00ff88;--text:#e0d4ff;--muted:#6a5a8a;--card:rgba(123,47,255,0.08);--border:rgba(123,47,255,0.3);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(123,47,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(123,47,255,0.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+.orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;opacity:0.15;}
+.orb1{width:300px;height:300px;background:var(--purple);top:-100px;right:-100px;}
+.orb2{width:200px;height:200px;background:var(--cyan);bottom:100px;left:-80px;}
+#app{position:relative;z-index:1;}
+.header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--border);background:rgba(5,5,16,0.95);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100;}
+.logo{font-family:monospace;font-size:18px;font-weight:900;background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px;}
+.logo span{font-size:10px;background:linear-gradient(135deg,var(--neon),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block;letter-spacing:4px;}
+.user-badge{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:6px 12px;font-size:12px;}
+.user-avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
+.nav{display:flex;background:rgba(8,8,32,0.98);border-bottom:1px solid var(--border);position:sticky;top:65px;z-index:99;}
+.nav-btn{flex:1;padding:12px 8px;background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;border-bottom:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:3px;transition:all 0.2s;font-family:sans-serif;}
+.nav-btn.active{color:var(--neon);border-bottom-color:var(--neon);}
+.nav-icon{font-size:18px;}
+.page{display:none;padding:16px;}
+.page.active{display:block;}
+.stats-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px;text-align:center;}
+.stat-val{font-family:monospace;font-size:16px;font-weight:700;color:var(--cyan);}
+.stat-label{font-size:10px;color:var(--muted);margin-top:2px;}
+.map-container{position:relative;overflow:auto;border:1px solid var(--border);border-radius:16px;background:var(--bg2);max-height:calc(100vh - 220px);cursor:grab;}
+#map-canvas{display:block;}
+.map-legend{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);}
+.legend-dot{width:12px;height:12px;border-radius:3px;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200;display:flex;align-items:flex-end;backdrop-filter:blur(8px);}
+.modal{width:100%;background:var(--bg2);border-top:1px solid var(--border);border-radius:24px 24px 0 0;padding:24px 20px 36px;animation:slideUp 0.3s ease;}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px;}
+.land-coords{font-family:monospace;font-size:13px;color:var(--cyan);margin-bottom:4px;}
+.land-title{font-size:22px;font-weight:700;margin-bottom:16px;}
+.land-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.info-box{background:rgba(123,47,255,0.1);border:1px solid var(--border);border-radius:12px;padding:12px;}
+.info-box-label{font-size:10px;color:var(--muted);margin-bottom:4px;}
+.info-box-val{font-size:16px;font-weight:700;}
+.btn{width:100%;padding:16px;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:10px;font-family:sans-serif;}
+.btn-primary{background:linear-gradient(135deg,var(--purple),var(--neon));color:white;box-shadow:0 0 20px rgba(123,47,255,0.4);}
+.btn-close{background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;font-family:sans-serif;text-align:center;width:100%;padding:8px;}
+.profile-hero{background:linear-gradient(135deg,rgba(123,47,255,0.2),rgba(0,245,255,0.1));border:1px solid var(--border);border-radius:20px;padding:24px 20px;text-align:center;margin-bottom:16px;}
+.profile-avatar{width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 12px;box-shadow:0 0 30px rgba(123,47,255,0.5);}
+.my-lands-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.my-land-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;}
+.ref-card{background:linear-gradient(135deg,rgba(123,47,255,0.15),rgba(255,45,120,0.1));border:1px solid rgba(123,47,255,0.4);border-radius:20px;padding:20px;margin-bottom:16px;text-align:center;}
+.ref-code{font-family:monospace;font-size:20px;color:var(--cyan);letter-spacing:4px;padding:12px;background:rgba(0,245,255,0.05);border-radius:12px;margin:12px 0;border:1px dashed rgba(0,245,255,0.3);}
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:rgba(0,255,136,0.15);border:1px solid var(--green);color:var(--green);padding:12px 24px;border-radius:20px;font-size:13px;z-index:300;display:none;backdrop-filter:blur(10px);white-space:nowrap;}
+.toast.error{background:rgba(255,45,120,0.15);border-color:var(--pink);color:var(--pink);}
+.toast.show{display:block;animation:fadeInOut 2.5s ease forwards;}
+@keyframes fadeInOut{0%{opacity:0}15%{opacity:1}75%{opacity:1}100%{opacity:0}}
+.section-title{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px;}
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
+.empty-state .icon{font-size:48px;margin-bottom:12px;}
 </style>
 </head>
 <body>
-
-<!-- PAGES -->
-<div id="page-mine" class="page active">
-  <div class="logo">
-    <h1>TRAXEX</h1>
-    <p>⛏ Crypto Miner</p>
-  </div>
-
-  <div class="balance-card">
-    <div class="balance-label">موجودی / BALANCE</div>
-    <div class="balance-amount" id="balance-display">0.00</div>
-    <div class="balance-ton" id="ton-display">≈ 0.000 TON</div>
-  </div>
-
-  <div class="mine-container">
-    <button class="mine-btn" id="mine-btn" onclick="doMine()">
-      <span class="mine-icon">⛏</span>
-      <span class="mine-label">MINE</span>
-      <span class="mine-amount" id="mine-amount-display">+4 TRX</span>
-    </button>
-  </div>
-
-  <div class="timer-box">
-    <div class="timer-label">⏳ زمان تا ماین بعدی</div>
-    <div class="timer-value" id="timer-display">آماده ماین!</div>
-  </div>
-
-  <div class="stats-row">
-    <div class="stat-box">
-      <div class="stat-label">امروز</div>
-      <div class="stat-value" id="today-display">0</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-label">تیم</div>
-      <div class="stat-value" id="team-count">0</div>
-    </div>
-  </div>
-</div>
-
-<div id="page-team" class="page">
-  <div class="page-header">
-    <h2>🌳 TEAM</h2>
-    <p>درخت زیرمجموعه‌های شما</p>
-  </div>
-
-  <div class="team-stats">
-    <div class="team-stat">
-      <div class="team-stat-num" id="ts-l1">0</div>
-      <div class="team-stat-label">لول ۱</div>
-    </div>
-    <div class="team-stat">
-      <div class="team-stat-num" id="ts-l2">0</div>
-      <div class="team-stat-label">لول ۲</div>
-    </div>
-    <div class="team-stat">
-      <div class="team-stat-num" id="ts-total">0</div>
-      <div class="team-stat-label">کل</div>
-    </div>
-  </div>
-
-  <div class="section-title">درخت باینری</div>
-  <div class="tree-wrapper">
-    <div class="tree" id="binary-tree"></div>
-  </div>
-
-  <div class="section-title">لینک دعوت</div>
-  <div class="ref-box">
-    <div style="color:var(--text2);font-size:12px;">🔗 لینک رفرال شما:</div>
-    <div class="ref-link" id="ref-link-display">در حال بارگذاری...</div>
-    <button class="copy-btn" onclick="copyRef()">📋 کپی لینک</button>
-  </div>
-</div>
-
-<div id="page-shop" class="page">
-  <div class="page-header">
-    <h2>🛒 SHOP</h2>
-    <p>آیتم‌ها را با TON خریداری کن</p>
-  </div>
-
-  <div class="shop-tabs">
-    <button class="shop-tab active" onclick="switchShopTab('regular',this)">🛒 معمولی</button>
-    <button class="shop-tab" onclick="switchShopTab('vip',this)">👑 VIP</button>
-  </div>
-
-  <div class="items-grid" id="items-regular"></div>
-  <div class="items-grid" id="items-vip" style="display:none"></div>
-</div>
-
-<div id="page-wallet" class="page">
-  <div class="page-header">
-    <h2>👛 WALLET</h2>
-    <p>موجودی و برداشت</p>
-  </div>
-
-  <div class="balance-card" style="margin-top:12px">
-    <div class="balance-label">موجودی کل</div>
-    <div class="balance-amount" id="wallet-balance">0.00</div>
-    <div class="balance-ton" id="wallet-ton">≈ 0.000 TON</div>
-  </div>
-
-  <div class="withdraw-card">
-    <h3>💸 درخواست برداشت</h3>
-    <div class="info-row">
-      <span>حداقل برداشت</span>
-      <span style="color:var(--gold2)">1000 TRAXEX</span>
-    </div>
-    <div class="info-row">
-      <span>معادل</span>
-      <span style="color:var(--cyan)">10 TON</span>
-    </div>
-    <div class="info-row">
-      <span>تایید</span>
-      <span style="color:var(--green)">دستی توسط ادمین</span>
-    </div>
-    <br>
-    <div class="input-group">
-      <label>مقدار (TRAXEX)</label>
-      <input type="number" id="wd-amount" placeholder="حداقل ۱۰۰۰">
-    </div>
-    <div class="input-group">
-      <label>آدرس کیف پول TON</label>
-      <input type="text" id="wd-wallet" placeholder="UQ..." style="direction:ltr;font-size:12px">
-    </div>
-    <button class="submit-btn" onclick="submitWithdraw()">💸 ثبت درخواست برداشت</button>
-  </div>
-</div>
-
-<!-- NAV -->
-<nav class="nav">
-  <button class="nav-btn active" onclick="showPage('mine',this)">
-    <span class="icon">⛏</span>ماین
-  </button>
-  <button class="nav-btn" onclick="showPage('team',this)">
-    <span class="icon">🌳</span>تیم
-  </button>
-  <button class="nav-btn" onclick="showPage('shop',this)">
-    <span class="icon">🛒</span>فروشگاه
-  </button>
-  <button class="nav-btn" onclick="showPage('wallet',this)">
-    <span class="icon">👛</span>کیف پول
-  </button>
-</nav>
-
-<!-- TOAST -->
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
 <div class="toast" id="toast"></div>
-
-<!-- ITEM MODAL -->
-<div class="modal-overlay" id="item-modal">
-  <div class="modal">
-    <span class="item-icon-big" id="modal-icon">⛏</span>
-    <h3 id="modal-name">Item Name</h3>
-    <p id="modal-effect">Effect description</p>
-    <div class="price-big" id="modal-price">0 TON</div>
-    <p style="color:var(--text2);font-size:12px;margin-bottom:4px">📤 ارسال TON به آدرس:</p>
-    <div class="wallet-display">UQCs20TzgI5bmr5TJo3PigiEn0DMJhWktPOw7bo27K2FVZwI</div>
-    <p style="color:var(--text2);font-size:12px;margin-top:8px">بعد از پرداخت، هش تراکنش را وارد کن:</p>
-    <input type="text" class="tx-input" id="modal-tx" placeholder="Transaction hash...">
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeModal()">انصراف</button>
-      <button class="btn-confirm" onclick="submitPurchase()">✅ ثبت خرید</button>
-    </div>
-  </div>
+<div id="app">
+<div class="header">
+<div>
+<div class="logo">TON WORLD<span>METAVERSE</span></div>
 </div>
-
+<div class="user-badge">
+<div class="user-avatar" id="user-avatar">?</div>
+<span id="user-name">لود...</span>
+</div>
+</div>
+<div class="nav">
+<button class="nav-btn active" onclick="showPage('map',this)"><span class="nav-icon">🗺️</span>نقشه</button>
+<button class="nav-btn" onclick="showPage('profile',this)"><span class="nav-icon">👤</span>پروفایل</button>
+<button class="nav-btn" onclick="showPage('referral',this)"><span class="nav-icon">👥</span>دعوت</button>
+<button class="nav-btn" onclick="showPage('info',this)"><span class="nav-icon">ℹ️</span>راهنما</button>
+</div>
+<div class="page active" id="page-map">
+<div class="stats-bar">
+<div class="stat-card"><div class="stat-val" id="stat-sold">...</div><div class="stat-label">فروخته شده</div></div>
+<div class="stat-card"><div class="stat-val" id="stat-available">...</div><div class="stat-label">موجود</div></div>
+<div class="stat-card"><div class="stat-val" id="stat-volume" style="color:var(--gold)">...</div><div class="stat-label">حجم TON</div></div>
+</div>
+<div class="map-container" id="map-container"><canvas id="map-canvas"></canvas></div>
+<div class="map-legend">
+<div class="legend-item"><div class="legend-dot" style="background:#0d0520"></div><span>آزاد (۱ TON)</span></div>
+<div class="legend-item"><div class="legend-dot" style="background:#1a0a45"></div><span>میانی (۲ TON)</span></div>
+<div class="legend-item"><div class="legend-dot" style="background:#2a1070"></div><span>مرکزی (۳ TON)</span></div>
+<div class="legend-item"><div class="legend-dot" style="background:#7b2fff"></div><span>خریداری شده</span></div>
+<div class="legend-item"><div class="legend-dot" style="background:#00f5ff"></div><span>زمین من</span></div>
+</div>
+</div>
+<div class="page" id="page-profile">
+<div class="profile-hero">
+<div class="profile-avatar">🌐</div>
+<div style="font-size:20px;font-weight:700" id="profile-name">لود...</div>
+<div style="font-size:12px;color:var(--muted)" id="profile-sub">...</div>
+</div>
+<div class="stats-bar">
+<div class="stat-card"><div class="stat-val" id="my-land-count" style="color:var(--neon)">0</div><div class="stat-label">زمین من</div></div>
+<div class="stat-card"><div class="stat-val" id="my-earned" style="color:var(--gold)">0</div><div class="stat-label">درآمد TON</div></div>
+<div class="stat-card"><div class="stat-val" id="my-value" style="color:var(--green)">0</div><div class="stat-label">ارزش کل</div></div>
+</div>
+<div class="section-title">زمین‌های من</div>
+<div class="my-lands-grid" id="my-lands-grid"><div class="empty-state" style="grid-column:1/-1"><div class="icon">🌌</div><p>هنوز زمینی نداری</p></div></div>
+</div>
+<div class="page" id="page-referral">
+<div class="ref-card">
+<div style="font-size:40px;margin-bottom:12px">🎯</div>
+<div style="font-size:18px;font-weight:700;margin-bottom:8px">دعوت دوستان</div>
+<div style="font-size:13px;color:var(--muted);margin-bottom:16px">به ازای هر خرید دوستت <span style="color:var(--gold);font-weight:700">۵٪</span> کمیسیون بگیر</div>
+<div class="ref-code" id="ref-code">لود...</div>
+<button class="btn btn-primary" onclick="copyRef()">📋 کپی لینک دعوت</button>
+</div>
+</div>
+<div class="page" id="page-info">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div class="ref-card" style="text-align:right">
+<div style="font-size:24px;margin-bottom:10px">🌐 TON WORLD چیه؟</div>
+<div style="font-size:14px;color:var(--muted);line-height:1.8">TON WORLD یه متاورس واقعی روی بلاکچین TON. هر زمین یه دارایی دیجیتاله که مالکیتش ۱۰۰٪ مال توئه.</div>
+</div>
+<div class="info-box" style="direction:rtl">
+<div style="font-size:16px;font-weight:700;margin-bottom:8px">💎 قیمت زمین‌ها</div>
+<div style="font-size:13px;color:var(--muted);line-height:2">🟣 معمولی: <span style="color:var(--gold)">۱ TON</span><br>🔵 میانی: <span style="color:var(--gold)">۲ TON</span><br>⭐ مرکزی: <span style="color:var(--gold)">۳ TON</span></div>
+</div>
+<div class="info-box" style="direction:rtl">
+<div style="font-size:16px;font-weight:700;margin-bottom:8px">💰 درآمد</div>
+<div style="font-size:13px;color:var(--muted);line-height:2">• فروش زمین به قیمت بالاتر<br>• کمیسیون ۵٪ رفرال<br>• اجاره بیلبورد (به زودی)</div>
+</div>
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="land-modal" style="display:none" onclick="if(event.target.id==='land-modal')closeModal()">
+<div class="modal">
+<div class="modal-handle"></div>
+<div class="land-coords" id="modal-coords">X:0 Y:0</div>
+<div class="land-title" id="modal-title">زمین آزاد</div>
+<div class="land-info-grid">
+<div class="info-box"><div class="info-box-label">قیمت</div><div class="info-box-val" id="modal-price" style="color:var(--gold);font-family:monospace">۱ TON</div></div>
+<div class="info-box"><div class="info-box-label">وضعیت</div><div class="info-box-val" id="modal-status">آزاد</div></div>
+<div class="info-box"><div class="info-box-label">نوع زمین</div><div class="info-box-val" id="modal-type">معمولی</div></div>
+<div class="info-box"><div class="info-box-label">موقعیت</div><div class="info-box-val" id="modal-zone">حومه</div></div>
+</div>
+<button class="btn btn-primary" id="modal-btn" onclick="handleLandAction()">💎 خرید این زمین</button>
+<button class="btn-close" onclick="closeModal()">بستن</button>
+</div>
+</div>
 <script>
-const BOT_TOKEN = "8625621495:AAFZvYuY6LHbYfr_UWQEh3zOK2kSO7QDv34";
-const API = `https://api.telegram.org/bot${BOT_TOKEN}`;
-const TON_WALLET = "UQCs20TzgI5bmr5TJo3PigiEn0DMJhWktPOw7bo27K2FVZwI";
+const API='https://tonworldbot-production.up.railway.app';
+const BOT_NAME='tonworld_bot';
+let tg=window.Telegram?.WebApp;
+let user=null,mapData=[],selectedLand=null,myLands=[];
+let canvas,ctx;
+const CELL=10,COLS=50,ROWS=50;
 
-let tg = window.Telegram.WebApp;
-tg.ready();
-tg.expand();
-
-let USER_ID = tg.initDataUnsafe?.user?.id || null;
-let BOT_USERNAME = "Minerobo_bot";
-let state = {
-  balance: 0,
-  lastMine: null,
-  interval: 4,
-  amount: 4,
-  ownedItems: [],
-  team: { left: null, right: null, total: 0, l1: 0, l2: 0 }
-};
-
-let selectedItem = null;
-let timerInterval = null;
-
-// ===================== ITEMS DATA =====================
-const ITEMS = {
-  regular: [
-    { key:"power_boots",   icon:"👢", name:"Power Boots",    effect:"ماین +۱ هر ۴ ساعت",      ton:0.5  },
-    { key:"speed_orb",     icon:"⚡", name:"Speed Orb",       effect:"زمان ماین ۳ ساعت",        ton:1.0  },
-    { key:"lucky_ring",    icon:"💍", name:"Lucky Ring",      effect:"شانس ۱۵٪ دوبل",           ton:1.5  },
-    { key:"auto_miner",    icon:"⭐", name:"Auto Miner",      effect:"ماین بدون کلیک",           ton:2.0  },
-    { key:"dark_crystal",  icon:"🔮", name:"Dark Crystal",    effect:"ماین +۳ هر ۴ ساعت",      ton:3.0  },
-    { key:"shadow_blade",  icon:"🗡️", name:"Shadow Blade",    effect:"شانس ۳۰٪ سه‌برابر",      ton:4.0  },
-    { key:"elite_pass",    icon:"🏆", name:"Elite Pass",      effect:"همه باف‌ها +۱۰٪",         ton:5.0  },
-    { key:"diamond_core",  icon:"💎", name:"Diamond Core",    effect:"ماین +۵ هر ۴ ساعت",      ton:8.0  },
-    { key:"legendary_orb", icon:"👑", name:"Legendary Orb",   effect:"ماین +۸ + auto + دوبل",  ton:15.0 },
-    { key:"genesis_stone", icon:"🌟", name:"Genesis Stone",   effect:"ماین x3 + همه باف‌ها",   ton:25.0 },
-  ],
-  vip: [
-    { key:"trident_force", icon:"🔱", name:"Trident Force",   effect:"ماین x4 + دوبل ۴۰٪",     ton:35   },
-    { key:"moon_shard",    icon:"🌙", name:"Moon Shard",      effect:"ماین شبانه x2",            ton:40   },
-    { key:"dragon_core",   icon:"🐉", name:"Dragon Core",     effect:"ماین +۱۵ هر ۴ ساعت",     ton:50   },
-    { key:"alchemist",     icon:"⚗️", name:"Alchemist Flask", effect:"رفرال +۵٪ اضافه",         ton:60   },
-    { key:"divine_shield", icon:"🛡️", name:"Divine Shield",   effect:"محافظت موجودی",            ton:70   },
-    { key:"abyssal_blade", icon:"🌊", name:"Abyssal Blade",   effect:"ماین x5 + auto + سقف x5", ton:85   },
-    { key:"meteor_hammer", icon:"☄️", name:"Meteor Hammer",   effect:"ماین هر ۲ ساعت",          ton:100  },
-    { key:"eye_of_skadi",  icon:"🧿", name:"Eye of Skadi",    effect:"همه کارایی‌ها x2",        ton:150  },
-    { key:"aghanim_shard", icon:"💠", name:"Aghanim Shard",   effect:"ماین x10 + رفرال x2",     ton:200  },
-    { key:"traxex_crown",  icon:"🏅", name:"TRAXEX Crown",    effect:"همه آیتم‌ها + ماین x15",  ton:500  },
-  ]
-};
-
-// ===================== API CALLS =====================
-async function apiCall(method, params={}) {
-  try {
-    const url = `${API}/${method}`;
-    const res = await fetch(url, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(params)
-    });
-    return await res.json();
-  } catch(e) { return null; }
+async function init(){
+tg?.expand();
+canvas=document.getElementById('map-canvas');
+ctx=canvas.getContext('2d');
+canvas.width=COLS*CELL;canvas.height=ROWS*CELL;
+try{
+const headers={};
+if(tg?.initData)headers['X-Init-Data']=tg.initData;
+const res=await fetch(`${API}/api/auth`,{method:'POST',headers:{'Content-Type':'application/json',...headers},body:JSON.stringify({telegram_id:tg?.initDataUnsafe?.user?.id||0})});
+user=await res.json();
+if(user&&!user.error){
+const name=user.first_name||user.username||'کاربر';
+document.getElementById('user-name').textContent=name;
+document.getElementById('user-avatar').textContent=name[0]?.toUpperCase()||'?';
+document.getElementById('profile-name').textContent=name;
+document.getElementById('profile-sub').textContent='@'+(user.username||'anonymous');
+document.getElementById('ref-code').textContent=user.referral_code||'---';
+}
+}catch(e){}
+await loadStats();await loadMap();await loadProfile();
+canvas.addEventListener('click',handleMapClick);
 }
 
-async function loadUserData() {
-  if (!USER_ID) {
-    // Demo mode
-    state.balance = 42.5;
-    state.lastMine = null;
-    state.ownedItems = ["power_boots"];
-    updateUI();
-    return;
-  }
-  // Get balance via bot API is not possible directly from frontend
-  // Use Telegram WebApp data instead
-  updateUI();
+async function loadStats(){
+try{const res=await fetch(`${API}/api/stats`);const d=await res.json();
+document.getElementById('stat-sold').textContent=d.sold_lands;
+document.getElementById('stat-available').textContent=d.available_lands;
+document.getElementById('stat-volume').textContent=d.total_volume;
+}catch(e){}}
+
+async function loadMap(){
+try{const res=await fetch(`${API}/api/map`);const d=await res.json();mapData=d.lands||[];drawMap();}
+catch(e){drawMap();}}
+
+async function loadProfile(){
+if(!user)return;
+try{const headers={};if(tg?.initData)headers['X-Init-Data']=tg.initData;
+const res=await fetch(`${API}/api/profile?id=${user.id}`,{headers});const d=await res.json();
+myLands=d.lands||[];
+document.getElementById('my-land-count').textContent=d.land_count||0;
+document.getElementById('my-earned').textContent=(d.user?.ton_earned||0).toFixed(2);
+document.getElementById('my-value').textContent=myLands.reduce((s,l)=>s+(l.price||1),0).toFixed(1);
+renderMyLands();drawMap();
+}catch(e){}}
+
+function renderMyLands(){
+const grid=document.getElementById('my-lands-grid');
+if(!myLands.length){grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="icon">🌌</div><p>هنوز زمینی نداری</p></div>';return;}
+grid.innerHTML=myLands.map(l=>`<div class="my-land-card" onclick="selectLand(${l.x},${l.y})"><div style="font-family:monospace;font-size:10px;color:var(--cyan)">${l.x},${l.y}</div><div style="font-size:20px;margin:5px 0">🏔️</div><div style="font-size:10px;color:var(--gold)">${l.price} TON</div></div>`).join('');
 }
 
-// ===================== MINE =====================
-async function doMine() {
-  const btn = document.getElementById('mine-btn');
-  if (btn.classList.contains('disabled')) return;
-
-  btn.style.transform = 'scale(0.9)';
-  setTimeout(()=>btn.style.transform='',200);
-
-  if (USER_ID) {
-    const result = await apiCall('sendMessage', {
-      chat_id: USER_ID,
-      text: '/mine_webapp'
-    });
-  }
-
-  // Optimistic UI
-  state.balance += state.amount;
-  state.lastMine = new Date().toISOString();
-  updateBalanceDisplay();
-  startTimer();
-  showToast(`⛏ +${state.amount} TRAXEX ماین شد!`);
-  btn.classList.add('disabled');
+function drawMap(){
+if(!ctx)return;
+const mySet=new Set(myLands.map(l=>`${l.x},${l.y}`));
+const lmap={};mapData.forEach(l=>{lmap[`${l.x},${l.y}`]=l;});
+ctx.clearRect(0,0,canvas.width,canvas.height);
+ctx.fillStyle='#050510';ctx.fillRect(0,0,canvas.width,canvas.height);
+for(let x=0;x<COLS;x++){for(let y=0;y<ROWS;y++){
+const key=`${x},${y}`;const land=lmap[key];const px=x*CELL,py=y*CELL;
+let color;
+if(land?.owner_id){color=mySet.has(key)?'#00f5ff':'#7b2fff';}
+else if(x>=20&&x<=30&&y>=20&&y<=30)color='#2a1070';
+else if(x>=15&&x<=35&&y>=15&&y<=35)color='#1a0a45';
+else color='#0d0520';
+ctx.fillStyle=color;ctx.fillRect(px+0.5,py+0.5,CELL-1,CELL-1);
+if(land?.owner_id){ctx.shadowColor=mySet.has(key)?'#00f5ff':'#b84fff';ctx.shadowBlur=4;ctx.fillRect(px+0.5,py+0.5,CELL-1,CELL-1);ctx.shadowBlur=0;}
+}}
+ctx.strokeStyle='rgba(123,47,255,0.12)';ctx.lineWidth=0.3;
+for(let x=0;x<=COLS;x++){ctx.beginPath();ctx.moveTo(x*CELL,0);ctx.lineTo(x*CELL,ROWS*CELL);ctx.stroke();}
+for(let y=0;y<=ROWS;y++){ctx.beginPath();ctx.moveTo(0,y*CELL);ctx.lineTo(COLS*CELL,y*CELL);ctx.stroke();}
+ctx.strokeStyle='rgba(0,245,255,0.5)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+ctx.strokeRect(20*CELL,20*CELL,11*CELL,11*CELL);ctx.setLineDash([]);
 }
 
-// ===================== TIMER =====================
-function startTimer() {
-  if (timerInterval) clearInterval(timerInterval);
-  updateTimerDisplay();
-  timerInterval = setInterval(updateTimerDisplay, 1000);
+function handleMapClick(e){
+const rect=canvas.getBoundingClientRect();
+const sx=canvas.width/rect.width,sy=canvas.height/rect.height;
+const x=Math.floor((e.clientX-rect.left)*sx/CELL);
+const y=Math.floor((e.clientY-rect.top)*sy/CELL);
+if(x>=0&&x<COLS&&y>=0&&y<ROWS)selectLand(x,y);
 }
 
-function updateTimerDisplay() {
-  if (!state.lastMine) {
-    document.getElementById('timer-display').textContent = 'آماده ماین! 🟢';
-    document.getElementById('mine-btn').classList.remove('disabled');
-    return;
-  }
-  const last = new Date(state.lastMine);
-  const next = new Date(last.getTime() + state.interval * 3600000);
-  const now = new Date();
-  const diff = next - now;
-  if (diff <= 0) {
-    document.getElementById('timer-display').textContent = 'آماده ماین! 🟢';
-    document.getElementById('mine-btn').classList.remove('disabled');
-    if (timerInterval) clearInterval(timerInterval);
-    return;
-  }
-  const h = Math.floor(diff/3600000);
-  const m = Math.floor((diff%3600000)/60000);
-  const s = Math.floor((diff%60000)/1000);
-  document.getElementById('timer-display').textContent =
-    `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  document.getElementById('mine-btn').classList.add('disabled');
+function selectLand(x,y){
+selectedLand={x,y};
+const lmap={};mapData.forEach(l=>{lmap[`${l.x},${l.y}`]=l;});
+const land=lmap[`${x},${y}`]||{x,y,price:1,owner_id:null};
+const isCenter=x>=20&&x<=30&&y>=20&&y<=30;
+const isMid=x>=15&&x<=35&&y>=15&&y<=35;
+const isMine=user&&land.owner_id===String(user.id);
+document.getElementById('modal-coords').textContent=`X:${x}  Y:${y}`;
+document.getElementById('modal-price').textContent=`${land.price||1} TON`;
+document.getElementById('modal-type').textContent=isCenter?'مرکزی ⭐':isMid?'میانی 🔵':'معمولی 🟣';
+document.getElementById('modal-zone').textContent=isCenter?'مرکز شهر':isMid?'میانه شهر':'حومه';
+const btn=document.getElementById('modal-btn');
+if(land.owner_id){
+if(isMine){document.getElementById('modal-title').textContent='🌐 زمین من';document.getElementById('modal-status').textContent='✅ مال من';btn.textContent='📢 فروش گذاشتن';btn.style.opacity='1';}
+else{document.getElementById('modal-title').textContent='🔒 اشغال شده';document.getElementById('modal-status').textContent='❌ فروخته شده';btn.textContent='🔒 فروخته شده';btn.style.opacity='0.5';}
+}else{document.getElementById('modal-title').textContent='🏔️ زمین آزاد';document.getElementById('modal-status').textContent='🟢 آزاد';btn.textContent=`💎 خرید با ${land.price||1} TON`;btn.style.opacity='1';}
+document.getElementById('land-modal').style.display='flex';
 }
 
-// ===================== UI =====================
-function updateUI() {
-  updateBalanceDisplay();
-  renderShop();
-  renderTree();
-  updateRefLink();
-  if (state.lastMine) startTimer();
+function closeModal(){document.getElementById('land-modal').style.display='none';selectedLand=null;}
+
+async function handleLandAction(){
+if(!selectedLand)return;
+if(!user){showToast('ابتدا وارد شو',true);return;}
+const{x,y}=selectedLand;
+const lmap={};mapData.forEach(l=>{lmap[`${l.x},${l.y}`]=l;});
+const land=lmap[`${x},${y}`]||{price:1};
+if(land.owner_id){showToast('این زمین فروخته شده',true);return;}
+showToast('در حال پردازش...');
+try{
+const headers={'Content-Type':'application/json'};if(tg?.initData)headers['X-Init-Data']=tg.initData;
+const res=await fetch(`${API}/api/buy`,{method:'POST',headers,body:JSON.stringify({x,y,tx_hash:'tg_'+Date.now(),telegram_id:user.id})});
+const d=await res.json();
+if(d.success){showToast('✅ زمین خریداری شد!');closeModal();await loadMap();await loadProfile();await loadStats();}
+else showToast(d.error||'خطا در خرید',true);
+}catch(e){showToast('خطا در اتصال',true);}}
+
+function showPage(page,btn){
+document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+document.getElementById(`page-${page}`).classList.add('active');
+btn.classList.add('active');
+if(page==='map')loadStats();
 }
 
-function updateBalanceDisplay() {
-  const bal = state.balance.toFixed(2);
-  const ton = (state.balance / 100).toFixed(3);
-  document.getElementById('balance-display').textContent = bal;
-  document.getElementById('ton-display').textContent = `≈ ${ton} TON`;
-  document.getElementById('wallet-balance').textContent = bal;
-  document.getElementById('wallet-ton').textContent = `≈ ${ton} TON`;
-  document.getElementById('mine-amount-display').textContent = `+${state.amount} TRX`;
-  document.getElementById('today-display').textContent = state.amount;
-  document.getElementById('team-count').textContent = state.team.total;
+function copyRef(){
+if(!user?.referral_code)return;
+const link=`https://t.me/${BOT_NAME}?start=${user.referral_code}`;
+navigator.clipboard?.writeText(link)||((el=>(document.body.appendChild(el),el.select(),document.execCommand('copy'),document.body.removeChild(el)))(Object.assign(document.createElement('textarea'),{value:link})));
+showToast('✅ لینک کپی شد!');
 }
 
-// ===================== TREE =====================
-function renderTree() {
-  const tree = document.getElementById('binary-tree');
-  const left = state.team.left;
-  const right = state.team.right;
-
-  tree.innerHTML = `
-    <div class="tree-level">
-      <div class="tree-node">
-        <div class="node-avatar me">👤</div>
-        <div class="node-id">شما</div>
-      </div>
-    </div>
-    <div class="tree-line"></div>
-    <div class="tree-level">
-      <div class="tree-node">
-        <div class="node-avatar ${left?'':'empty'}">${left?'👤':'➕'}</div>
-        <div class="node-id">${left?'#'+String(left).slice(-4):'خالی'}</div>
-      </div>
-      <div style="width:30px"></div>
-      <div class="tree-node">
-        <div class="node-avatar ${right?'':'empty'}">${right?'👤':'➕'}</div>
-        <div class="node-id">${right?'#'+String(right).slice(-4):'خالی'}</div>
-      </div>
-    </div>
-  `;
-
-  document.getElementById('ts-l1').textContent = state.team.l1;
-  document.getElementById('ts-l2').textContent = state.team.l2;
-  document.getElementById('ts-total').textContent = state.team.total;
+function showToast(msg,isError=false){
+const t=document.getElementById('toast');t.textContent=msg;
+t.className=`toast ${isError?'error':''} show`;
+setTimeout(()=>t.classList.remove('show'),2500);
 }
 
-// ===================== REF LINK =====================
-function updateRefLink() {
-  const link = USER_ID
-    ? `https://t.me/${BOT_USERNAME}?start=${USER_ID}`
-    : `https://t.me/${BOT_USERNAME}?start=demo`;
-  document.getElementById('ref-link-display').textContent = link;
-}
-
-function copyRef() {
-  const link = document.getElementById('ref-link-display').textContent;
-  navigator.clipboard.writeText(link).then(()=>showToast('✅ لینک کپی شد!')).catch(()=>{
-    const ta = document.createElement('textarea');
-    ta.value = link; document.body.appendChild(ta);
-    ta.select(); document.execCommand('copy');
-    document.body.removeChild(ta);
-    showToast('✅ لینک کپی شد!');
-  });
-}
-
-// ===================== SHOP =====================
-function renderShop() {
-  renderItems('regular');
-  renderItems('vip');
-}
-
-function renderItems(type) {
-  const container = document.getElementById(`items-${type}`);
-  container.innerHTML = '';
-  ITEMS[type].forEach(item => {
-    const owned = state.ownedItems.includes(item.key);
-    const isVip = type === 'vip';
-    container.innerHTML += `
-      <div class="item-card ${owned?'owned':''} ${isVip?'vip':''}" onclick="showItemModal('${item.key}','${type}')">
-        ${isVip?'<span class="vip-crown">👑</span>':''}
-        <span class="item-icon">${item.icon}</span>
-        <div class="item-name">${item.name}</div>
-        <div class="item-effect">${item.effect}</div>
-        <span class="item-price ${owned?'owned-badge':isVip?'vip-price':''}">${owned?'✅ دارم':`${item.ton} TON`}</span>
-      </div>
-    `;
-  });
-}
-
-function switchShopTab(type, btn) {
-  document.querySelectorAll('.shop-tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('items-regular').style.display = type==='regular'?'grid':'none';
-  document.getElementById('items-vip').style.display = type==='vip'?'grid':'none';
-}
-
-// ===================== ITEM MODAL =====================
-function showItemModal(key, type) {
-  const item = [...ITEMS.regular,...ITEMS.vip].find(i=>i.key===key);
-  if (!item) return;
-  if (state.ownedItems.includes(key)) { showToast('✅ این آیتم رو داری!'); return; }
-  selectedItem = item;
-  document.getElementById('modal-icon').textContent = item.icon;
-  document.getElementById('modal-name').textContent = item.name;
-  document.getElementById('modal-effect').textContent = item.effect;
-  document.getElementById('modal-price').textContent = `${item.ton} TON`;
-  document.getElementById('modal-tx').value = '';
-  document.getElementById('item-modal').classList.add('show');
-}
-
-function closeModal() {
-  document.getElementById('item-modal').classList.remove('show');
-  selectedItem = null;
-}
-
-async function submitPurchase() {
-  if (!selectedItem) return;
-  const tx = document.getElementById('modal-tx').value.trim();
-  if (!tx || tx.length < 10) {
-    showToast('❌ هش تراکنش رو وارد کن!'); return;
-  }
-  if (USER_ID) {
-    await apiCall('sendMessage', {
-      chat_id: USER_ID,
-      text: `TX_PURCHASE:${selectedItem.key}:${tx}`
-    });
-  }
-  closeModal();
-  showToast('✅ درخواست ارسال شد! منتظر تایید ادمین باش.');
-}
-
-// ===================== WITHDRAW =====================
-async function submitWithdraw() {
-  const amount = parseFloat(document.getElementById('wd-amount').value);
-  const wallet = document.getElementById('wd-wallet').value.trim();
-  if (!amount || amount < 1000) { showToast('❌ حداقل ۱۰۰۰ TRAXEX'); return; }
-  if (state.balance < amount) { showToast('❌ موجودی کافی نیست'); return; }
-  if (!wallet || wallet.length < 10) { showToast('❌ آدرس کیف پول رو وارد کن'); return; }
-  if (USER_ID) {
-    await apiCall('sendMessage', {
-      chat_id: USER_ID,
-      text: `WD_REQUEST:${amount}:${wallet}`
-    });
-  }
-  showToast('✅ درخواست برداشت ثبت شد!');
-  document.getElementById('wd-amount').value = '';
-  document.getElementById('wd-wallet').value = '';
-}
-
-// ===================== NAV =====================
-function showPage(name, btn) {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById(`page-${name}`).classList.add('active');
-  btn.classList.add('active');
-}
-
-// ===================== TOAST =====================
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2500);
-}
-
-// ===================== BOT MESSAGE HANDLER =====================
-// Listen for data from bot via URL params
-const urlParams = new URLSearchParams(window.location.search);
-const initData = tg.initDataUnsafe;
-
-if (initData?.user) {
-  USER_ID = initData.user.id;
-}
-
-// Load from tg start_param
-const startParam = tg.initDataUnsafe?.start_param;
-
-// ===================== INIT =====================
-loadUserData();
-setInterval(updateTimerDisplay, 1000);
+init();
 </script>
 </body>
 </html>
